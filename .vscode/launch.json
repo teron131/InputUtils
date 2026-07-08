@@ -1,0 +1,24 @@
+{
+	"configurations": [
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:InputUtils}",
+			"name": "Debug InputUtils",
+			"target": "InputUtils",
+			"configuration": "debug",
+			"preLaunchTask": "swift: Build Debug InputUtils"
+		},
+		{
+			"type": "swift",
+			"request": "launch",
+			"args": [],
+			"cwd": "${workspaceFolder:InputUtils}",
+			"name": "Release InputUtils",
+			"target": "InputUtils",
+			"configuration": "release",
+			"preLaunchTask": "swift: Build Release InputUtils"
+		}
+	]
+}
