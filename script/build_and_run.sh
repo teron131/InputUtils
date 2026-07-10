@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Builds, installs, and launches the menu-bar app from its stable Applications location.
+
 set -euo pipefail
 
 MODE="${1:-run}"
@@ -16,6 +18,7 @@ APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 ICON_RENDERER="$ROOT_DIR/.build/tools/render_icon"
+INSTALLED_APP="/Applications/$APP_NAME.app"
 
 cd "$ROOT_DIR"
 
@@ -72,8 +75,11 @@ else
   /usr/bin/codesign --force --sign - --identifier "$BUNDLE_ID" "$APP_BUNDLE" >/dev/null
 fi
 
+rm -rf "$INSTALLED_APP"
+/usr/bin/ditto "$APP_BUNDLE" "$INSTALLED_APP"
+
 open_app() {
-  /usr/bin/open -n "$APP_BUNDLE"
+  /usr/bin/open -n "$INSTALLED_APP"
 }
 
 case "$MODE" in
