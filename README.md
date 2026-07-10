@@ -12,7 +12,9 @@ It can also keep the default audio input pinned to the built-in microphone, whic
 ./script/build_and_run.sh
 ```
 
-The app is menu-bar-only and stages a signed local app bundle at `dist/InputUtils.app`.
+The app is menu-bar-only, stages a signed local app bundle at `dist/InputUtils.app`, then installs and launches it from `/Applications/InputUtils.app`.
+
+InputUtils registers itself to start at login the first time it runs. If macOS requires approval, enable it in System Settings > General > Login Items.
 
 ## Verify
 
