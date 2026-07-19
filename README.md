@@ -2,6 +2,8 @@
 
 InputUtils is a tiny macOS menu bar utility for trackpad, mouse, and audio input behavior.
 
+![InputUtils menu bar controls](screenshot.png)
+
 macOS exposes Natural Scrolling as a global preference, not a clean per-device setting. This app lets you toggle that trackpad setting while using a system scroll event tap to reverse physical mouse wheel events.
 
 It can also keep the default audio input pinned to the built-in microphone, which avoids apps switching the input to headset microphones.
