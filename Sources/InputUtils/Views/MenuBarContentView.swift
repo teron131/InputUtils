@@ -280,8 +280,8 @@ private enum SystemSettingsLinks {
   }
 }
 
-private extension View {
-  func deviceRowStyle(
+extension View {
+  fileprivate func deviceRowStyle(
     isActive: Bool,
     accent: Color
   ) -> some View {
@@ -298,7 +298,7 @@ private extension View {
       .animation(.easeOut(duration: 0.18), value: isActive)
   }
 
-  func plainRowStyle() -> some View {
+  fileprivate func plainRowStyle() -> some View {
     padding(.horizontal, 9)
       .padding(.vertical, 7)
       .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))

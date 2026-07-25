@@ -28,7 +28,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       try SMAppService.mainApp.register()
       logger.info("Registered InputUtils to start at login")
     } catch {
-      logger.error("Could not register InputUtils to start at login: \(error.localizedDescription, privacy: .public)")
+      logger.error(
+        "Could not register InputUtils to start at login: \(error.localizedDescription, privacy: .public)"
+      )
     }
   }
 }
