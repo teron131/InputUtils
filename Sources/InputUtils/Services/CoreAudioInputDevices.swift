@@ -52,14 +52,16 @@ final class CoreAudioInputDevices {
     var size = UInt32(MemoryLayout<AudioDeviceID>.size)
     var address = Self.audioAddress(kAudioHardwarePropertyDefaultInputDevice)
 
-    guard AudioObjectGetPropertyData(
-      Self.systemObject,
-      &address,
-      0,
-      nil,
-      &size,
-      &deviceID
-    ) == noErr else {
+    guard
+      AudioObjectGetPropertyData(
+        Self.systemObject,
+        &address,
+        0,
+        nil,
+        &size,
+        &deviceID
+      ) == noErr
+    else {
       return nil
     }
 
@@ -109,12 +111,14 @@ final class CoreAudioInputDevices {
       handler()
     }
 
-    guard AudioObjectAddPropertyListenerBlock(
-      Self.systemObject,
-      &address,
-      DispatchQueue.main,
-      listener
-    ) == noErr else {
+    guard
+      AudioObjectAddPropertyListenerBlock(
+        Self.systemObject,
+        &address,
+        DispatchQueue.main,
+        listener
+      ) == noErr
+    else {
       return nil
     }
 
@@ -149,27 +153,31 @@ final class CoreAudioInputDevices {
     var address = Self.audioAddress(kAudioHardwarePropertyDevices)
     var size: UInt32 = 0
 
-    guard AudioObjectGetPropertyDataSize(
-      Self.systemObject,
-      &address,
-      0,
-      nil,
-      &size
-    ) == noErr else {
+    guard
+      AudioObjectGetPropertyDataSize(
+        Self.systemObject,
+        &address,
+        0,
+        nil,
+        &size
+      ) == noErr
+    else {
       return []
     }
 
     let count = Int(size) / MemoryLayout<AudioDeviceID>.size
     var deviceIDs = [AudioDeviceID](repeating: 0, count: count)
 
-    guard AudioObjectGetPropertyData(
-      Self.systemObject,
-      &address,
-      0,
-      nil,
-      &size,
-      &deviceIDs
-    ) == noErr else {
+    guard
+      AudioObjectGetPropertyData(
+        Self.systemObject,
+        &address,
+        0,
+        nil,
+        &size,
+        &deviceIDs
+      ) == noErr
+    else {
       return []
     }
 
@@ -192,13 +200,15 @@ final class CoreAudioInputDevices {
     )
     var size: UInt32 = 0
 
-    guard AudioObjectGetPropertyDataSize(
-      deviceID,
-      &address,
-      0,
-      nil,
-      &size
-    ) == noErr else {
+    guard
+      AudioObjectGetPropertyDataSize(
+        deviceID,
+        &address,
+        0,
+        nil,
+        &size
+      ) == noErr
+    else {
       return false
     }
 
@@ -216,14 +226,16 @@ final class CoreAudioInputDevices {
 
     var size = UInt32(MemoryLayout<CFString?>.size)
 
-    guard AudioObjectGetPropertyData(
-      deviceID,
-      &address,
-      0,
-      nil,
-      &size,
-      namePointer
-    ) == noErr, let name = namePointer.pointee else {
+    guard
+      AudioObjectGetPropertyData(
+        deviceID,
+        &address,
+        0,
+        nil,
+        &size,
+        namePointer
+      ) == noErr, let name = namePointer.pointee
+    else {
       return nil
     }
 

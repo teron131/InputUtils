@@ -6,7 +6,8 @@ import Foundation
 @main
 enum RenderIcon {
   static func main() throws {
-    let outputPath = CommandLine.arguments.dropFirst().first
+    let outputPath =
+      CommandLine.arguments.dropFirst().first
       ?? "dist/InputUtils.app/Contents/Resources/InputUtilsIcon.icns"
     let outputURL = URL(fileURLWithPath: outputPath)
     let resourcesURL = outputURL.deletingLastPathComponent()
@@ -116,10 +117,12 @@ func renderIcon(pixels: Int) throws -> Data {
 
   NSGraphicsContext.restoreGraphicsState()
 
-  guard let data = representation.representation(
-    using: .png,
-    properties: [:]
-  ) else {
+  guard
+    let data = representation.representation(
+      using: .png,
+      properties: [:]
+    )
+  else {
     throw NSError(
       domain: "InputUtilsIcon",
       code: 2,
