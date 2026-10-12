@@ -28,7 +28,7 @@ The probe exercises scroll classification and inversion without requiring physic
 
 ## Permissions
 
-The app needs Accessibility permission because it modifies scroll events. If macOS does not show the prompt, open the menu bar item and choose `Open Privacy Settings`, then allow `InputUtils`.
+The app needs Accessibility permission because it modifies scroll events. If macOS does not show the prompt, open the menu bar item and choose `Privacy settings`, then allow `InputUtils`.
 
 ## Notes
 

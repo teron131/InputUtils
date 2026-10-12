@@ -1,4 +1,4 @@
-// Renders the concise menu bar controls for scroll switching, permissions, and settings.
+// Renders the concise menu bar controls for scroll switching, audio input pinning, permissions, and settings.
 
 import AppKit
 import SwiftUI
@@ -16,7 +16,10 @@ struct MenuBarContentView: View {
       )
 
       VStack(spacing: 6) {
-        TrackpadToggleRow(
+        InputRow(
+          title: "Trackpad",
+          detail: "Natural scrolling",
+          systemImage: "rectangle.and.hand.point.up.left",
           isOn: Binding(
             get: { controller.isTrackpadNaturalScrollingEnabled },
             set: { controller.setTrackpadNaturalScrollingEnabled($0) }
@@ -24,20 +27,23 @@ struct MenuBarContentView: View {
           isActive: controller.activeDevice == .trackpad
         )
 
-        DeviceStatusRow(
+        InputRow(
           title: "Mouse",
-          status: "Reversed",
           detail: "Wheel scrolling",
           systemImage: "computermouse",
+          status: "Reversed",
           isActive: controller.activeDevice == .mouse
         )
 
-        MicToggleRow(
+        InputRow(
+          title: "Audio Input",
+          detail: "Built-in mic",
+          systemImage: "mic",
+          status: audioInputController.status,
           isOn: Binding(
             get: { audioInputController.isEnabled },
             set: { audioInputController.setEnabled($0) }
-          ),
-          status: audioInputController.status
+          )
         )
       }
 
@@ -106,7 +112,7 @@ struct MenuBarContentView: View {
       return .primary
     case .paused:
       return .secondary
-    case .permissionNeeded, .preferenceUnavailable, .tapUnavailable:
+    case .permissionNeeded, .preferenceUnavailable:
       return .red
     }
   }
@@ -141,52 +147,21 @@ private struct StatusHeader: View {
   }
 }
 
-private struct TrackpadToggleRow: View {
-  @Binding var isOn: Bool
-  let isActive: Bool
-  private let accent = Color.accentColor
-
-  var body: some View {
-    HStack(spacing: 8) {
-      Image(systemName: "rectangle.and.hand.point.up.left")
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(isActive ? accent : .secondary)
-        .frame(width: 20, height: 20)
-
-      VStack(alignment: .leading, spacing: 2) {
-        Text("Trackpad")
-          .font(.system(size: 12, weight: .semibold))
-          .foregroundStyle(.primary)
-
-        Text("Natural scrolling")
-          .font(.system(size: 10, weight: .medium))
-          .foregroundStyle(.secondary)
-      }
-
-      Spacer(minLength: 8)
-
-      Toggle("", isOn: $isOn)
-        .labelsHidden()
-        .toggleStyle(.switch)
-        .controlSize(.small)
-    }
-    .deviceRowStyle(isActive: isActive, accent: accent)
-  }
-}
-
-private struct DeviceStatusRow: View {
+/// One input row: icon, title and detail, then an optional status label and switch.
+/// `isActive` tints the row while its device is the one currently scrolling.
+private struct InputRow: View {
   let title: String
-  let status: String
   let detail: String
   let systemImage: String
-  let isActive: Bool
-  private let accent = Color.accentColor
+  var status: String?
+  var isOn: Binding<Bool>?
+  var isActive = false
 
   var body: some View {
     HStack(spacing: 8) {
       Image(systemName: systemImage)
         .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(isActive ? accent : .secondary)
+        .foregroundStyle(tint)
         .frame(width: 20, height: 20)
 
       VStack(alignment: .leading, spacing: 2) {
@@ -197,54 +172,40 @@ private struct DeviceStatusRow: View {
         Text(detail)
           .font(.system(size: 10, weight: .medium))
           .foregroundStyle(.secondary)
-      }
-
-      Spacer(minLength: 8)
-
-      Text(status)
-        .font(.system(size: 11, weight: .semibold, design: .rounded))
-        .foregroundStyle(isActive ? accent : .secondary)
-        .lineLimit(1)
-    }
-    .deviceRowStyle(isActive: isActive, accent: accent)
-  }
-}
-
-private struct MicToggleRow: View {
-  @Binding var isOn: Bool
-  let status: String
-
-  var body: some View {
-    HStack(spacing: 8) {
-      Image(systemName: "mic")
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(.secondary)
-        .frame(width: 20, height: 20)
-
-      VStack(alignment: .leading, spacing: 2) {
-        Text("Audio Input")
-          .font(.system(size: 12, weight: .semibold))
-          .foregroundStyle(.primary)
-
-        Text("Built-in mic")
-          .font(.system(size: 10, weight: .medium))
-          .foregroundStyle(.secondary)
           .lineLimit(1)
       }
 
       Spacer(minLength: 8)
 
-      Text(status)
-        .font(.system(size: 11, weight: .semibold, design: .rounded))
-        .foregroundStyle(.secondary)
-        .lineLimit(1)
+      if let status {
+        Text(status)
+          .font(.system(size: 11, weight: .semibold, design: .rounded))
+          .foregroundStyle(tint)
+          .lineLimit(1)
+      }
 
-      Toggle("", isOn: $isOn)
-        .labelsHidden()
-        .toggleStyle(.switch)
-        .controlSize(.small)
+      if let isOn {
+        Toggle("", isOn: isOn)
+          .labelsHidden()
+          .toggleStyle(.switch)
+          .controlSize(.small)
+      }
     }
-    .plainRowStyle()
+    .padding(.horizontal, 9)
+    .padding(.vertical, 7)
+    .background(
+      isActive ? Color.accentColor.opacity(0.16) : Color.secondary.opacity(0.08),
+      in: RoundedRectangle(cornerRadius: 8)
+    )
+    .overlay {
+      RoundedRectangle(cornerRadius: 8)
+        .stroke(isActive ? Color.accentColor.opacity(0.55) : Color.clear, lineWidth: 1)
+    }
+    .animation(.easeOut(duration: 0.18), value: isActive)
+  }
+
+  private var tint: Color {
+    isActive ? .accentColor : .secondary
   }
 }
 
@@ -277,30 +238,5 @@ private enum SystemSettingsLinks {
     }
 
     NSWorkspace.shared.open(url)
-  }
-}
-
-extension View {
-  fileprivate func deviceRowStyle(
-    isActive: Bool,
-    accent: Color
-  ) -> some View {
-    padding(.horizontal, 9)
-      .padding(.vertical, 7)
-      .background(
-        isActive ? accent.opacity(0.16) : Color.secondary.opacity(0.08),
-        in: RoundedRectangle(cornerRadius: 8)
-      )
-      .overlay {
-        RoundedRectangle(cornerRadius: 8)
-          .stroke(isActive ? accent.opacity(0.55) : Color.clear, lineWidth: 1)
-      }
-      .animation(.easeOut(duration: 0.18), value: isActive)
-  }
-
-  fileprivate func plainRowStyle() -> some View {
-    padding(.horizontal, 9)
-      .padding(.vertical, 7)
-      .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
   }
 }

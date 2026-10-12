@@ -10,34 +10,10 @@ enum NaturalScrollPreference {
   private static let key = "com.apple.swipescrolldirection"
 
   /// Reads the current global Natural Scrolling value from the same domain System Settings uses.
+  /// The read stays in-process so callers can poll it on the main thread; synchronizing first picks up changes made by System Settings or the `defaults` write below.
   static func isTrackpadNaturalScrollingEnabled() -> Bool {
-    let process = Process()
-    let pipe = Pipe()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/defaults")
-    process.arguments = [
-      "read",
-      "-g",
-      key,
-    ]
-    process.standardOutput = pipe
-    process.standardError = Pipe()
-
-    do {
-      try process.run()
-      process.waitUntilExit()
-    } catch {
-      return UserDefaults.standard.bool(forKey: key)
-    }
-
-    guard process.terminationStatus == 0 else {
-      return UserDefaults.standard.bool(forKey: key)
-    }
-
-    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-    let value = String(data: data, encoding: .utf8)?
-      .trimmingCharacters(in: .whitespacesAndNewlines)
-
-    return value == "1" || value == "true" || value == "TRUE"
+    CFPreferencesAppSynchronize(kCFPreferencesAnyApplication)
+    return CFPreferencesGetAppBooleanValue(key as CFString, kCFPreferencesAnyApplication, nil)
   }
 
   /// Writes the same global preference changed by System Settings > Trackpad > Natural scrolling.
@@ -47,7 +23,7 @@ enum NaturalScrollPreference {
     process.arguments = [
       "write",
       "-g",
-      "com.apple.swipescrolldirection",
+      key,
       "-bool",
       enabled ? "true" : "false",
     ]

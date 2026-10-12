@@ -1,4 +1,4 @@
-// Owns the menu-bar-only SwiftUI app entry point and app-wide scroll controller lifetime.
+// Owns the menu-bar-only SwiftUI app entry point, the app-wide scroll and audio controller lifetimes, and login-item registration.
 
 import AppKit
 import OSLog

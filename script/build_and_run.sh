@@ -22,8 +22,6 @@ INSTALLED_APP="/Applications/$APP_NAME.app"
 
 cd "$ROOT_DIR"
 
-pkill -x "$APP_NAME" >/dev/null 2>&1 || true
-
 BUILD_DIR="$(swift build --show-bin-path)"
 swift build
 BUILD_BINARY="$BUILD_DIR/$APP_NAME"
@@ -60,7 +58,7 @@ PLIST
 
 mkdir -p "$(dirname "$ICON_RENDERER")"
 swiftc \
-  "$ROOT_DIR/Sources/InputUtils/Support/InputUtilsIcon.swift" \
+  "$ROOT_DIR/Sources/InputUtils/InputUtilsIcon.swift" \
   "$ROOT_DIR/script/render_icon.swift" \
   -o "$ICON_RENDERER"
 "$ICON_RENDERER" "$APP_RESOURCES/InputUtilsIcon.icns"
@@ -74,6 +72,9 @@ if security find-identity -v -p codesigning | grep -Fq "\"$SIGNING_IDENTITY\""; 
 else
   /usr/bin/codesign --force --sign - --identifier "$BUNDLE_ID" "$APP_BUNDLE" >/dev/null
 fi
+
+# Stop the running copy only once the new bundle is staged, so a failed build leaves it running.
+pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
 rm -rf "$INSTALLED_APP"
 /usr/bin/ditto "$APP_BUNDLE" "$INSTALLED_APP"
