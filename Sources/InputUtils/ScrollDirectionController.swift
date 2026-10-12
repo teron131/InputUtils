@@ -9,7 +9,6 @@ enum ScrollSwitchStatus: Equatable {
   case paused
   case permissionNeeded
   case preferenceUnavailable
-  case tapUnavailable
 
   var title: String {
     switch self {
@@ -21,8 +20,6 @@ enum ScrollSwitchStatus: Equatable {
       return "Permission needed"
     case .preferenceUnavailable:
       return "Preference unavailable"
-    case .tapUnavailable:
-      return "Event tap unavailable"
     }
   }
 
@@ -36,8 +33,6 @@ enum ScrollSwitchStatus: Equatable {
       return "Allow Accessibility access."
     case .preferenceUnavailable:
       return "Natural Scrolling was not set."
-    case .tapUnavailable:
-      return "Restart or re-enable access."
     }
   }
 }
@@ -55,16 +50,14 @@ final class ScrollDirectionController: ObservableObject {
   @Published private(set) var isTrackpadNaturalScrollingEnabled: Bool
 
   private let enabledKey = "ScrollDirectionController.isEnabled"
+  private let trackpadPreferenceRefreshInterval: TimeInterval = 5
   private let activeDeviceRefreshInterval: TimeInterval = 0.45
   private let activeDeviceHoldInterval: TimeInterval = 0.9
   private var eventTap: CFMachPort?
   private var runLoopSource: CFRunLoopSource?
-  private var reconcileTimer: Timer?
+  private var trackpadPreferenceTimer: Timer?
   private var activeDeviceTimer: Timer?
   private var lastActiveDeviceSignalTime: TimeInterval = 0
-  private var pendingActiveDevice: ActiveScrollDevice = .none
-  private var trackpadPreferenceReadInFlight = false
-  private var trackpadPreferenceRevision = 0
 
   init() {
     let defaults = UserDefaults.standard
@@ -73,17 +66,17 @@ final class ScrollDirectionController: ObservableObject {
     }
 
     isEnabled = defaults.bool(forKey: enabledKey)
-    isTrackpadNaturalScrollingEnabled = Self.readTrackpadPreference()
+    isTrackpadNaturalScrollingEnabled = NaturalScrollPreference.isTrackpadNaturalScrollingEnabled()
 
     if isEnabled {
       start()
     }
 
-    startPreferenceReconciliation()
+    startTrackpadPreferenceRefresh()
   }
 
   deinit {
-    reconcileTimer?.invalidate()
+    trackpadPreferenceTimer?.invalidate()
     activeDeviceTimer?.invalidate()
   }
 
@@ -121,12 +114,11 @@ final class ScrollDirectionController: ObservableObject {
       return
     }
 
-    trackpadPreferenceRevision += 1
     isTrackpadNaturalScrollingEnabled = enabled
   }
 
   /// Installs a session event tap that edits only non-continuous wheel scroll events.
-  func start() {
+  private func start() {
     stopEventTap()
 
     let eventMask = CGEventMask(1 << CGEventType.scrollWheel.rawValue)
@@ -149,6 +141,7 @@ final class ScrollDirectionController: ObservableObject {
     eventTap = tap
     runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
 
+    // The source runs on the main run loop, so the callback and the state it touches stay on the main thread.
     if let runLoopSource {
       CFRunLoopAddSource(CFRunLoopGetMain(), runLoopSource, .commonModes)
     }
@@ -158,34 +151,33 @@ final class ScrollDirectionController: ObservableObject {
   }
 
   /// Removes the event tap without changing the global trackpad natural-scroll preference.
-  func stop() {
+  private func stop() {
     stopEventTap()
     activeDeviceTimer?.invalidate()
     activeDeviceTimer = nil
     activeDevice = .none
-    pendingActiveDevice = .none
     status = .paused
   }
 
   /// Re-enables a tap that macOS disabled after timeout or user input protection.
-  func handleTapDisabled() {
-    if let eventTap {
-      CGEvent.tapEnable(tap: eventTap, enable: true)
-      status = .running
-    } else if isEnabled {
-      start()
+  fileprivate func handleTapDisabled() {
+    guard let eventTap else {
+      return
     }
+
+    CGEvent.tapEnable(tap: eventTap, enable: true)
+    status = .running
   }
 
   /// Inverts mouse-wheel scroll deltas while leaving continuous trackpad-style events untouched.
-  func handleScrollEvent(_ event: CGEvent) {
+  fileprivate func handleScrollEvent(_ event: CGEvent) {
     guard ScrollEventClassifier.isWheelMouse(event) else {
-      scheduleActiveDevice(.trackpad)
+      markActiveDevice(.trackpad)
       return
     }
 
     ScrollEventInverter.invert(event)
-    scheduleActiveDevice(.mouse)
+    markActiveDevice(.mouse)
   }
 
   private func stopEventTap() {
@@ -200,91 +192,51 @@ final class ScrollDirectionController: ObservableObject {
     }
   }
 
-  private func startPreferenceReconciliation() {
-    reconcileTimer = Timer.scheduledTimer(
-      withTimeInterval: 5,
+  private func startTrackpadPreferenceRefresh() {
+    trackpadPreferenceTimer = Timer.scheduledTimer(
+      withTimeInterval: trackpadPreferenceRefreshInterval,
       repeats: true
     ) { [weak self] _ in
-      self?.reconcileRunningState()
+      self?.refreshTrackpadPreference()
     }
   }
 
-  private func reconcileRunningState() {
-    guard isEnabled else {
-      return
-    }
-
+  /// Keeps the panel toggle in step with Natural Scrolling changes made outside the app while switching is running.
+  private func refreshTrackpadPreference() {
     guard status == .running else {
       return
     }
 
-    refreshTrackpadPreferenceInBackground()
+    let enabled = NaturalScrollPreference.isTrackpadNaturalScrollingEnabled()
+    if enabled != isTrackpadNaturalScrollingEnabled {
+      isTrackpadNaturalScrollingEnabled = enabled
+    }
   }
 
-  private func scheduleActiveDevice(_ device: ActiveScrollDevice) {
+  /// Highlights the device behind the latest scroll event until scrolling stays quiet for the hold interval.
+  /// Repeated events from the same device re-arm the hold at most once per refresh interval, which keeps the per-event cost to a time comparison.
+  private func markActiveDevice(_ device: ActiveScrollDevice) {
     let now = ProcessInfo.processInfo.systemUptime
     guard
-      device != pendingActiveDevice
+      device != activeDevice
         || now - lastActiveDeviceSignalTime >= activeDeviceRefreshInterval
     else {
       return
     }
 
-    pendingActiveDevice = device
     lastActiveDeviceSignalTime = now
-
-    if Thread.isMainThread {
-      markActiveDevice(device)
-    } else {
-      DispatchQueue.main.async { [weak self] in
-        self?.markActiveDevice(device)
-      }
+    if device != activeDevice {
+      activeDevice = device
     }
-  }
 
-  private func markActiveDevice(_ device: ActiveScrollDevice) {
-    activeDevice = device
     activeDeviceTimer?.invalidate()
     activeDeviceTimer = Timer.scheduledTimer(
       withTimeInterval: activeDeviceHoldInterval,
       repeats: false
     ) { [weak self] _ in
       self?.activeDevice = .none
-      self?.pendingActiveDevice = .none
       self?.activeDeviceTimer = nil
     }
-  }
-
-  private func refreshTrackpadPreferenceInBackground() {
-    guard !trackpadPreferenceReadInFlight else {
-      return
-    }
-
-    trackpadPreferenceReadInFlight = true
-    let revision = trackpadPreferenceRevision
-
-    DispatchQueue.global(qos: .utility).async { [weak self] in
-      let enabled = Self.readTrackpadPreference()
-
-      DispatchQueue.main.async { [weak self] in
-        guard let self else {
-          return
-        }
-
-        trackpadPreferenceReadInFlight = false
-        guard revision == trackpadPreferenceRevision else {
-          return
-        }
-
-        if enabled != isTrackpadNaturalScrollingEnabled {
-          isTrackpadNaturalScrollingEnabled = enabled
-        }
-      }
-    }
-  }
-
-  private static func readTrackpadPreference() -> Bool {
-    NaturalScrollPreference.isTrackpadNaturalScrollingEnabled()
   }
 
   private func requestAccessibilityTrustPrompt() {
@@ -294,35 +246,6 @@ final class ScrollDirectionController: ObservableObject {
       ] as CFDictionary
 
     AXIsProcessTrustedWithOptions(options)
-  }
-}
-
-enum ScrollEventClassifier {
-  /// Treats only scroll events without continuous or gesture phase markers as physical wheel mouse input.
-  static func isWheelMouse(_ event: CGEvent) -> Bool {
-    let isContinuous = event.getIntegerValueField(.scrollWheelEventIsContinuous) != 0
-    let hasGesturePhase = event.getIntegerValueField(.scrollWheelEventScrollPhase) != 0
-    let hasMomentumPhase = event.getIntegerValueField(.scrollWheelEventMomentumPhase) != 0
-
-    return !isContinuous && !hasGesturePhase && !hasMomentumPhase
-  }
-}
-
-enum ScrollEventInverter {
-  private static let axisDeltaFields: [CGEventField] = [
-    .scrollWheelEventDeltaAxis1,
-    .scrollWheelEventDeltaAxis2,
-    .scrollWheelEventDeltaAxis3,
-  ]
-
-  /// Flips primary wheel-axis deltas and lets CoreGraphics keep derived point and fixed-point fields consistent.
-  static func invert(_ event: CGEvent) {
-    for field in axisDeltaFields {
-      let value = event.getIntegerValueField(field)
-      if value != 0 {
-        event.setIntegerValueField(field, value: -value)
-      }
-    }
   }
 }
 

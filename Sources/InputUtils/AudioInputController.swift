@@ -17,13 +17,9 @@ final class AudioInputController: ObservableObject {
     }
 
     isEnabled = defaults.bool(forKey: enabledKey)
-    refreshStatus(enforce: isEnabled)
+    refreshStatus()
     inputDevices.observeChanges { [weak self] in
-      guard let self else {
-        return
-      }
-
-      refreshStatus(enforce: isEnabled)
+      self?.refreshStatus()
     }
   }
 
@@ -35,27 +31,25 @@ final class AudioInputController: ObservableObject {
 
     isEnabled = enabled
     UserDefaults.standard.set(enabled, forKey: enabledKey)
-    refreshStatus(enforce: enabled)
+    refreshStatus()
   }
 
-  /// Refreshes device names and optionally restores the default input to the built-in microphone.
-  func refreshStatus(enforce: Bool) {
-    guard let builtInInput = inputDevices.findBuiltInInputDevice() else {
+  /// Restores the built-in microphone as the default input while pinning is enabled, then reports the outcome.
+  /// Runs at launch, on every toggle, and whenever CoreAudio reports a default-input or device-list change.
+  private func refreshStatus() {
+    guard let builtInInputID = inputDevices.builtInInputDeviceID() else {
       status = "No built-in mic"
       return
     }
 
-    let activeInputID = inputDevices.currentInputDeviceID()
-
-    if enforce && activeInputID != builtInInput.id {
-      if inputDevices.setDefaultInputDevice(builtInInput.id) {
-        status = "Always"
-      } else {
-        status = "Set failed"
-      }
+    guard isEnabled else {
+      status = "Ready"
       return
     }
 
-    status = isEnabled ? "Always" : "Ready"
+    let isPinned =
+      inputDevices.currentInputDeviceID() == builtInInputID
+      || inputDevices.setDefaultInputDevice(builtInInputID)
+    status = isPinned ? "Always" : "Set failed"
   }
 }

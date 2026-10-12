@@ -3,47 +3,37 @@
 import CoreAudio
 import Foundation
 
-struct AudioInputDevice {
-  let id: AudioDeviceID
-  let name: String
-
-  /// Matches device names through lowercased tokens because CoreAudio exposes localized display names.
-  func nameContains(_ tokens: [String]) -> Bool {
-    let normalizedName = name.lowercased()
-    return tokens.allSatisfy { token in
-      normalizedName.contains(token)
-    }
-  }
-}
-
 final class CoreAudioInputDevices {
   private static let systemObject = AudioObjectID(kAudioObjectSystemObject)
+  private static let observedSelectors = [
+    kAudioHardwarePropertyDefaultInputDevice,
+    kAudioHardwarePropertyDevices,
+  ]
 
-  private var defaultInputAddress = CoreAudioInputDevices.audioAddress(
-    kAudioHardwarePropertyDefaultInputDevice
-  )
-  private var devicesAddress = CoreAudioInputDevices.audioAddress(
-    kAudioHardwarePropertyDevices
-  )
-  private var defaultInputListener: AudioObjectPropertyListenerBlock?
-  private var devicesListener: AudioObjectPropertyListenerBlock?
+  private var changeListener: AudioObjectPropertyListenerBlock?
 
   deinit {
-    removeChangeListeners()
+    removeChangeListener()
   }
 
-  /// Installs CoreAudio listeners for both default-input and device-list changes.
+  /// Installs one CoreAudio listener for both default-input and device-list changes, delivered on the main queue.
   func observeChanges(_ handler: @escaping () -> Void) {
-    removeChangeListeners()
+    removeChangeListener()
 
-    defaultInputListener = addSystemListener(
-      address: &defaultInputAddress,
-      handler: handler
-    )
-    devicesListener = addSystemListener(
-      address: &devicesAddress,
-      handler: handler
-    )
+    let listener: AudioObjectPropertyListenerBlock = { _, _ in
+      handler()
+    }
+    changeListener = listener
+
+    for selector in Self.observedSelectors {
+      var address = Self.audioAddress(selector)
+      AudioObjectAddPropertyListenerBlock(
+        Self.systemObject,
+        &address,
+        DispatchQueue.main,
+        listener
+      )
+    }
   }
 
   /// Reads the current system default input device identifier.
@@ -69,7 +59,8 @@ final class CoreAudioInputDevices {
   }
 
   /// Chooses the built-in microphone from the current input-device list by stable name tokens.
-  func findBuiltInInputDevice() -> AudioInputDevice? {
+  /// Names are matched lowercased because CoreAudio exposes localized display names.
+  func builtInInputDeviceID() -> AudioDeviceID? {
     let inputDevices = allInputDevices()
     let preferredNameTokens = [
       ["macbook", "microphone"],
@@ -79,9 +70,10 @@ final class CoreAudioInputDevices {
 
     for tokens in preferredNameTokens {
       if let device = inputDevices.first(where: { device in
-        device.nameContains(tokens)
+        let name = device.name.lowercased()
+        return tokens.allSatisfy { name.contains($0) }
       }) {
-        return device
+        return device.id
       }
     }
 
@@ -103,53 +95,25 @@ final class CoreAudioInputDevices {
     ) == noErr
   }
 
-  private func addSystemListener(
-    address: inout AudioObjectPropertyAddress,
-    handler: @escaping () -> Void
-  ) -> AudioObjectPropertyListenerBlock? {
-    let listener: AudioObjectPropertyListenerBlock = { _, _ in
-      handler()
-    }
-
-    guard
-      AudioObjectAddPropertyListenerBlock(
-        Self.systemObject,
-        &address,
-        DispatchQueue.main,
-        listener
-      ) == noErr
-    else {
-      return nil
-    }
-
-    return listener
-  }
-
-  private func removeChangeListeners() {
-    removeSystemListener(defaultInputListener, address: &defaultInputAddress)
-    defaultInputListener = nil
-
-    removeSystemListener(devicesListener, address: &devicesAddress)
-    devicesListener = nil
-  }
-
-  private func removeSystemListener(
-    _ listener: AudioObjectPropertyListenerBlock?,
-    address: inout AudioObjectPropertyAddress
-  ) {
-    guard let listener else {
+  private func removeChangeListener() {
+    guard let changeListener else {
       return
     }
 
-    AudioObjectRemovePropertyListenerBlock(
-      Self.systemObject,
-      &address,
-      DispatchQueue.main,
-      listener
-    )
+    for selector in Self.observedSelectors {
+      var address = Self.audioAddress(selector)
+      AudioObjectRemovePropertyListenerBlock(
+        Self.systemObject,
+        &address,
+        DispatchQueue.main,
+        changeListener
+      )
+    }
+
+    self.changeListener = nil
   }
 
-  private func allInputDevices() -> [AudioInputDevice] {
+  private func allInputDevices() -> [(id: AudioDeviceID, name: String)] {
     var address = Self.audioAddress(kAudioHardwarePropertyDevices)
     var size: UInt32 = 0
 
@@ -186,10 +150,7 @@ final class CoreAudioInputDevices {
         return nil
       }
 
-      return AudioInputDevice(
-        id: deviceID,
-        name: name
-      )
+      return (id: deviceID, name: name)
     }
   }
 
