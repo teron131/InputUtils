@@ -1,4 +1,4 @@
-// Generates the Input Utils app icon from the same five-bar mark used in the menu bar.
+// Generates the Input Utils app icon: the outline mouse mark on a squircle split into silver and graphite halves, each half drawing the mark in the other's color.
 
 import AppKit
 import Foundation
@@ -91,28 +91,72 @@ func renderIcon(pixels: Int) throws -> Data {
 
   NSGraphicsContext.saveGraphicsState()
   NSGraphicsContext.current = context
-  context.cgContext.setShouldAntialias(true)
-  context.cgContext.setAllowsAntialiasing(true)
+  let cg = context.cgContext
+  cg.setShouldAntialias(true)
+  cg.setAllowsAntialiasing(true)
 
-  let size = CGFloat(pixels)
-  NSColor(calibratedWhite: 0.08, alpha: 1).setFill()
-  NSBezierPath(
-    roundedRect: CGRect(x: 0, y: 0, width: size, height: size),
-    xRadius: size * 0.22,
-    yRadius: size * 0.22
+  let silver = CGColor(srgbRed: 0.93, green: 0.94, blue: 0.95, alpha: 1)
+  let graphite = CGColor(srgbRed: 0.11, green: 0.12, blue: 0.14, alpha: 1)
+
+  // macOS icon grid: an 824-point body with 185-point corners and a drop shadow, centered on a 1024 canvas.
+  let unit = CGFloat(pixels) / 1024
+  let body = CGRect(x: 100 * unit, y: 100 * unit, width: 824 * unit, height: 824 * unit)
+  let shape = CGPath(
+    roundedRect: body,
+    cornerWidth: 185 * unit,
+    cornerHeight: 185 * unit,
+    transform: nil
   )
-  .fill()
 
-  NSColor.white.setFill()
-  let glyphWidth = size * 0.52
-  let glyphHeight = size * 0.64
-  InputUtilsIcon.drawWaveformGlyph(
-    in: CGRect(
-      x: (size - glyphWidth) / 2,
-      y: (size - glyphHeight) / 2,
-      width: glyphWidth,
-      height: glyphHeight
-    )
+  cg.saveGState()
+  cg.setShadow(
+    offset: CGSize(width: 0, height: -10 * unit),
+    blur: 20 * unit,
+    color: CGColor(gray: 0, alpha: 0.3)
+  )
+  cg.addPath(shape)
+  cg.setFillColor(graphite)
+  cg.fillPath()
+  cg.restoreGState()
+
+  cg.addPath(shape)
+  cg.clip()
+
+  let mark = InputUtilsIcon.markPath(
+    in: body.insetBy(dx: body.width * 0.15, dy: body.height * 0.15))
+  let (left, right) = body.divided(atDistance: body.width / 2, from: .minXEdge)
+  for (half, background, ink) in [(left, silver, graphite), (right, graphite, silver)] {
+    cg.saveGState()
+    cg.clip(to: half)
+    cg.setFillColor(background)
+    cg.fill(half)
+    cg.addPath(mark)
+    cg.setFillColor(ink)
+    cg.fillPath()
+    cg.restoreGState()
+  }
+
+  // Light on dark reads bolder than dark on light, so a graphite edge reaching 3.5 points either side of the outline thickens the left mark and thins the right one until the halves look equal.
+  cg.addPath(mark)
+  cg.setStrokeColor(graphite)
+  cg.setLineWidth(7 * unit)
+  cg.setLineJoin(.round)
+  cg.strokePath()
+
+  let sheen = CGGradient(
+    colorsSpace: nil,
+    colors: [
+      CGColor(gray: 1, alpha: 0.14),
+      CGColor(gray: 1, alpha: 0),
+      CGColor(gray: 0, alpha: 0.1),
+    ] as CFArray,
+    locations: [0, 0.55, 1]
+  )!
+  cg.drawLinearGradient(
+    sheen,
+    start: CGPoint(x: body.midX, y: body.maxY),
+    end: CGPoint(x: body.midX, y: body.minY),
+    options: []
   )
 
   NSGraphicsContext.restoreGraphicsState()
