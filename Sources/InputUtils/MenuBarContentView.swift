@@ -1,17 +1,18 @@
-// Renders the concise menu bar controls for scroll switching, audio input pinning, permissions, and settings.
+// Renders the concise menu bar controls for scroll switching, trackpad Natural Scrolling, audio input pinning, permissions, and settings.
 
 import AppKit
 import SwiftUI
 
 struct MenuBarContentView: View {
-  @ObservedObject var controller: ScrollDirectionController
+  @ObservedObject var scrollController: ScrollDirectionController
+  @ObservedObject var naturalScrollPreference: NaturalScrollPreference
   @ObservedObject var audioInputController: AudioInputController
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       StatusHeader(
-        title: controller.status.title,
-        detail: controller.status.detail,
+        title: scrollController.status.title,
+        detail: scrollController.status.detail,
         color: statusColor
       )
 
@@ -20,19 +21,20 @@ struct MenuBarContentView: View {
           title: "Trackpad",
           detail: "Natural scrolling",
           systemImage: "rectangle.and.hand.point.up.left",
+          status: naturalScrollPreference.writeFailed ? "Set failed" : nil,
           isOn: Binding(
-            get: { controller.isTrackpadNaturalScrollingEnabled },
-            set: { controller.setTrackpadNaturalScrollingEnabled($0) }
+            get: { naturalScrollPreference.isEnabled },
+            set: { naturalScrollPreference.setEnabled($0) }
           ),
-          isActive: controller.activeDevice == .trackpad
+          isActive: scrollController.activeDevice == .trackpad
         )
 
         InputRow(
           title: "Mouse",
           detail: "Wheel scrolling",
           systemImage: "computermouse",
-          status: "Reversed",
-          isActive: controller.activeDevice == .mouse
+          status: scrollController.status == .running ? "Reversed" : nil,
+          isActive: scrollController.activeDevice == .mouse
         )
 
         InputRow(
@@ -49,19 +51,19 @@ struct MenuBarContentView: View {
 
       VStack(spacing: 6) {
         Button {
-          controller.setEnabled(!controller.isEnabled)
+          scrollController.setEnabled(!scrollController.isEnabled)
         } label: {
           ActionLabel(
-            title: controller.isEnabled ? "Pause switching" : "Resume switching",
-            systemImage: controller.isEnabled ? "pause.fill" : "play.fill"
+            title: scrollController.isEnabled ? "Pause switching" : "Resume switching",
+            systemImage: scrollController.isEnabled ? "pause.fill" : "play.fill"
           )
         }
         .buttonStyle(.borderedProminent)
         .controlSize(.regular)
 
-        if controller.status == .permissionNeeded {
+        if scrollController.status == .permissionNeeded {
           Button {
-            controller.requestPermissionAndRetry()
+            scrollController.requestPermissionAndRetry()
           } label: {
             ActionLabel(
               title: "Retry permission",
@@ -107,12 +109,12 @@ struct MenuBarContentView: View {
   }
 
   private var statusColor: Color {
-    switch controller.status {
+    switch scrollController.status {
     case .running:
       return .primary
     case .paused:
       return .secondary
-    case .permissionNeeded, .preferenceUnavailable:
+    case .permissionNeeded:
       return .red
     }
   }

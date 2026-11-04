@@ -1,4 +1,4 @@
-// Coordinates the global natural-scroll preference, wheel-event edits, and event-tap lifecycle.
+// Coordinates wheel-event edits, the event-tap lifecycle, and the highlight for the device currently scrolling.
 
 import ApplicationServices
 import Combine
@@ -8,7 +8,6 @@ enum ScrollSwitchStatus: Equatable {
   case running
   case paused
   case permissionNeeded
-  case preferenceUnavailable
 
   var title: String {
     switch self {
@@ -18,8 +17,6 @@ enum ScrollSwitchStatus: Equatable {
       return "Paused"
     case .permissionNeeded:
       return "Permission needed"
-    case .preferenceUnavailable:
-      return "Preference unavailable"
     }
   }
 
@@ -31,8 +28,6 @@ enum ScrollSwitchStatus: Equatable {
       return "Scroll events pass through."
     case .permissionNeeded:
       return "Allow Accessibility access."
-    case .preferenceUnavailable:
-      return "Natural Scrolling was not set."
     }
   }
 }
@@ -47,36 +42,24 @@ final class ScrollDirectionController: ObservableObject {
   @Published private(set) var isEnabled: Bool
   @Published private(set) var status: ScrollSwitchStatus = .paused
   @Published private(set) var activeDevice: ActiveScrollDevice = .none
-  @Published private(set) var isTrackpadNaturalScrollingEnabled: Bool
 
   private let enabledKey = "ScrollDirectionController.isEnabled"
-  private let trackpadPreferenceRefreshInterval: TimeInterval = 5
   private let activeDeviceRefreshInterval: TimeInterval = 0.45
   private let activeDeviceHoldInterval: TimeInterval = 0.9
   private var eventTap: CFMachPort?
   private var runLoopSource: CFRunLoopSource?
-  private var trackpadPreferenceTimer: Timer?
   private var activeDeviceTimer: Timer?
   private var lastActiveDeviceSignalTime: TimeInterval = 0
 
   init() {
-    let defaults = UserDefaults.standard
-    if defaults.object(forKey: enabledKey) == nil {
-      defaults.set(true, forKey: enabledKey)
-    }
-
-    isEnabled = defaults.bool(forKey: enabledKey)
-    isTrackpadNaturalScrollingEnabled = NaturalScrollPreference.isTrackpadNaturalScrollingEnabled()
-
+    UserDefaults.standard.register(defaults: [enabledKey: true])
+    isEnabled = UserDefaults.standard.bool(forKey: enabledKey)
     if isEnabled {
       start()
     }
-
-    startTrackpadPreferenceRefresh()
   }
 
   deinit {
-    trackpadPreferenceTimer?.invalidate()
     activeDeviceTimer?.invalidate()
   }
 
@@ -99,22 +82,6 @@ final class ScrollDirectionController: ObservableObject {
   /// Retries tap installation and lets the event-tap result decide whether a permission prompt is needed.
   func requestPermissionAndRetry() {
     start()
-  }
-
-  /// Updates the macOS trackpad Natural Scrolling preference from the panel toggle.
-  func setTrackpadNaturalScrollingEnabled(_ enabled: Bool) {
-    guard enabled != isTrackpadNaturalScrollingEnabled else {
-      return
-    }
-
-    do {
-      try NaturalScrollPreference.setTrackpadNaturalScrollingEnabled(enabled)
-    } catch {
-      status = .preferenceUnavailable
-      return
-    }
-
-    isTrackpadNaturalScrollingEnabled = enabled
   }
 
   /// Installs a session event tap that edits only non-continuous wheel scroll events.
@@ -189,27 +156,6 @@ final class ScrollDirectionController: ObservableObject {
     if let eventTap {
       CGEvent.tapEnable(tap: eventTap, enable: false)
       self.eventTap = nil
-    }
-  }
-
-  private func startTrackpadPreferenceRefresh() {
-    trackpadPreferenceTimer = Timer.scheduledTimer(
-      withTimeInterval: trackpadPreferenceRefreshInterval,
-      repeats: true
-    ) { [weak self] _ in
-      self?.refreshTrackpadPreference()
-    }
-  }
-
-  /// Keeps the panel toggle in step with Natural Scrolling changes made outside the app while switching is running.
-  private func refreshTrackpadPreference() {
-    guard status == .running else {
-      return
-    }
-
-    let enabled = NaturalScrollPreference.isTrackpadNaturalScrollingEnabled()
-    if enabled != isTrackpadNaturalScrollingEnabled {
-      isTrackpadNaturalScrollingEnabled = enabled
     }
   }
 

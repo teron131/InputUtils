@@ -11,12 +11,8 @@ final class AudioInputController: ObservableObject {
   private let inputDevices = CoreAudioInputDevices()
 
   init() {
-    let defaults = UserDefaults.standard
-    if defaults.object(forKey: enabledKey) == nil {
-      defaults.set(true, forKey: enabledKey)
-    }
-
-    isEnabled = defaults.bool(forKey: enabledKey)
+    UserDefaults.standard.register(defaults: [enabledKey: true])
+    isEnabled = UserDefaults.standard.bool(forKey: enabledKey)
     refreshStatus()
     inputDevices.observeChanges { [weak self] in
       self?.refreshStatus()

@@ -1,4 +1,4 @@
-// Owns the menu-bar-only SwiftUI app entry point, the app-wide scroll and audio controller lifetimes, and login-item registration.
+// Owns the menu-bar-only SwiftUI app entry point, the lifetimes of the app-wide scroll, Natural Scrolling, and audio owners, and login-item registration.
 
 import AppKit
 import OSLog
@@ -39,12 +39,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 struct InputUtilsApp: App {
   @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
   @StateObject private var scrollController = ScrollDirectionController()
+  @StateObject private var naturalScrollPreference = NaturalScrollPreference()
   @StateObject private var audioInputController = AudioInputController()
 
   var body: some Scene {
     MenuBarExtra {
       MenuBarContentView(
-        controller: scrollController,
+        scrollController: scrollController,
+        naturalScrollPreference: naturalScrollPreference,
         audioInputController: audioInputController
       )
     } label: {
