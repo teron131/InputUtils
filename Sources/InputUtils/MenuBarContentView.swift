@@ -1,223 +1,274 @@
-// Renders the concise menu bar controls for scroll switching, trackpad Natural Scrolling, audio input pinning, permissions, and settings.
+// Renders the menu bar window: one switch per input behavior named by what it does, the idle fade's schedule drawn from the current brightness, and menu-style links to the settings those behaviors depend on.
 
 import AppKit
+import Charts
 import SwiftUI
 
 struct MenuBarContentView: View {
   @ObservedObject var scrollController: ScrollDirectionController
   @ObservedObject var naturalScrollPreference: NaturalScrollPreference
   @ObservedObject var audioInputController: AudioInputController
+  @ObservedObject var idleDimmingController: IdleDimmingController
+  @State private var brightness: Float?
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 10) {
-      StatusHeader(
-        title: scrollController.status.title,
-        detail: scrollController.status.detail,
-        color: statusColor
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(spacing: Layout.glyphSpacing) {
+        Image(nsImage: InputUtilsIcon.menuBarImage)
+          .resizable()
+          .scaledToFit()
+          .frame(width: Layout.glyphSize, height: Layout.glyphSize)
+          .frame(width: Layout.glyphWidth)
+
+        Text("InputUtils")
+          .font(.system(size: 13, weight: .semibold))
+      }
+      .padding(.vertical, 4)
+
+      Divider()
+        .padding(.vertical, 6)
+
+      BehaviorRow(
+        title: "Natural trackpad scrolling",
+        systemImage: "rectangle.and.hand.point.up.left",
+        problem: naturalScrollPreference.writeFailed ? "Set failed" : nil,
+        isActive: scrollController.activeDevice == .trackpad,
+        isOn: Binding(
+          get: { naturalScrollPreference.isEnabled },
+          set: { naturalScrollPreference.setEnabled($0) }
+        )
       )
 
-      VStack(spacing: 6) {
-        InputRow(
-          title: "Trackpad",
-          detail: "Natural scrolling",
-          systemImage: "rectangle.and.hand.point.up.left",
-          status: naturalScrollPreference.writeFailed ? "Set failed" : nil,
-          isOn: Binding(
-            get: { naturalScrollPreference.isEnabled },
-            set: { naturalScrollPreference.setEnabled($0) }
-          ),
-          isActive: scrollController.activeDevice == .trackpad
-        )
+      RowDivider()
 
-        InputRow(
-          title: "Mouse",
-          detail: "Wheel scrolling",
-          systemImage: "computermouse",
-          status: scrollController.status == .running ? "Reversed" : nil,
-          isActive: scrollController.activeDevice == .mouse
+      // Flipping the wheel gives the mouse whichever direction the trackpad is not using.
+      BehaviorRow(
+        title: naturalScrollPreference.isEnabled
+          ? "Traditional mouse scrolling" : "Natural mouse scrolling",
+        systemImage: "computermouse",
+        problem: scrollController.needsPermission ? "Needs Accessibility access" : nil,
+        isActive: scrollController.activeDevice == .mouse,
+        isOn: Binding(
+          get: { scrollController.isEnabled },
+          set: { scrollController.setEnabled($0) }
         )
+      )
 
-        InputRow(
-          title: "Audio Input",
-          detail: "Built-in mic",
-          systemImage: "mic",
-          status: audioInputController.status,
-          isOn: Binding(
-            get: { audioInputController.isEnabled },
-            set: { audioInputController.setEnabled($0) }
-          )
+      RowDivider()
+
+      BehaviorRow(
+        title: "Keep built-in mic as input",
+        systemImage: "mic",
+        problem: audioInputController.problem,
+        isOn: Binding(
+          get: { audioInputController.isEnabled },
+          set: { audioInputController.setEnabled($0) }
         )
+      )
+
+      RowDivider()
+
+      BehaviorRow(
+        title: "Dim screen gradually",
+        systemImage: "sun.max",
+        problem: idleDimmingController.isAvailable ? nil : "Unavailable",
+        isOn: Binding(
+          get: { idleDimmingController.isEnabled },
+          set: { idleDimmingController.setEnabled($0) }
+        )
+      )
+      .disabled(!idleDimmingController.isAvailable)
+
+      // A brightness already at the floor has nothing to fade, so the schedule stays hidden.
+      if idleDimmingController.isEnabled, let brightness,
+        IdleDimming.fadeEnd(from: brightness) > IdleDimming.delay
+      {
+        FadeSchedule(start: brightness)
+          .padding(.leading, Layout.textInset)
+          .padding(.bottom, 6)
       }
 
-      VStack(spacing: 6) {
-        Button {
-          scrollController.setEnabled(!scrollController.isEnabled)
-        } label: {
-          ActionLabel(
-            title: scrollController.isEnabled ? "Pause switching" : "Resume switching",
-            systemImage: scrollController.isEnabled ? "pause.fill" : "play.fill"
-          )
-        }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.regular)
+      Divider()
+        .padding(.vertical, 6)
 
-        if scrollController.status == .permissionNeeded {
-          Button {
-            scrollController.requestPermissionAndRetry()
-          } label: {
-            ActionLabel(
-              title: "Retry permission",
-              systemImage: "arrow.clockwise"
-            )
-          }
-          .buttonStyle(.bordered)
+      if scrollController.needsPermission {
+        MenuItem(title: "Retry Accessibility access") {
+          scrollController.requestPermissionAndRetry()
         }
-
-        Button {
-          SystemSettingsLinks.openAccessibilityPrivacy()
-        } label: {
-          ActionLabel(
-            title: "Privacy settings",
-            systemImage: "lock.shield"
-          )
-        }
-        .buttonStyle(.bordered)
-
-        Button {
-          SystemSettingsLinks.openTrackpad()
-        } label: {
-          ActionLabel(
-            title: "Trackpad settings",
-            systemImage: "rectangle.connected.to.line.below"
-          )
-        }
-        .buttonStyle(.bordered)
       }
 
-      Button {
+      MenuItem(title: "Accessibility settings…") {
+        SystemSettingsLinks.openAccessibilityPrivacy()
+      }
+
+      MenuItem(title: "Trackpad settings…") {
+        SystemSettingsLinks.openTrackpad()
+      }
+
+      Divider()
+        .padding(.vertical, 6)
+
+      MenuItem(title: "Quit") {
         NSApplication.shared.terminate(nil)
-      } label: {
-        Label("Quit", systemImage: "power")
-          .frame(maxWidth: .infinity, alignment: .center)
       }
-      .buttonStyle(.plain)
-      .foregroundStyle(.secondary)
     }
-    .padding(12)
+    .padding(10)
     .frame(width: 280)
-    .background(.regularMaterial)
-  }
-
-  private var statusColor: Color {
-    switch scrollController.status {
-    case .running:
-      return .primary
-    case .paused:
-      return .secondary
-    case .permissionNeeded:
-      return .red
+    .animation(.easeOut(duration: 0.18), value: idleDimmingController.isEnabled)
+    // The window becomes key each time the menu opens, which is when the fade would start from the brightness just set.
+    // On the first open it becomes key before this view subscribes, so appearing reads the level too.
+    .onAppear { brightness = idleDimmingController.brightnessLevel() }
+    .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) {
+      _ in
+      brightness = idleDimmingController.brightnessLevel()
     }
   }
 }
 
-private struct StatusHeader: View {
+private enum Layout {
+  static let glyphSize: CGFloat = 16
+  static let glyphWidth: CGFloat = 20
+  static let glyphSpacing: CGFloat = 10
+  static let textInset = glyphWidth + glyphSpacing
+}
+
+/// One input behavior: its device glyph, what it does, any problem stopping it, and its switch.
+/// The glyph takes the accent color while its device is the one scrolling.
+private struct BehaviorRow: View {
   let title: String
-  let detail: String
-  let color: Color
+  let systemImage: String
+  let problem: String?
+  var isActive = false
+  @Binding var isOn: Bool
 
   var body: some View {
-    HStack(alignment: .top, spacing: 9) {
-      Image(nsImage: InputUtilsIcon.menuBarImage)
+    HStack(spacing: Layout.glyphSpacing) {
+      // A shared box keeps wide symbols such as the trackpad from outweighing the narrow ones.
+      Image(systemName: systemImage)
         .resizable()
         .scaledToFit()
-        .foregroundStyle(color)
-        .frame(width: 18, height: 18)
-        .padding(.top, 3)
-        .frame(width: 30, alignment: .center)
+        .frame(width: Layout.glyphSize, height: Layout.glyphSize)
+        .foregroundStyle(isActive ? Color.accentColor : Color.secondary)
+        .frame(width: Layout.glyphWidth)
 
       VStack(alignment: .leading, spacing: 1) {
         Text(title)
-          .font(.system(size: 15, weight: .semibold))
-          .foregroundStyle(.primary)
-          .lineLimit(2)
+          .font(.system(size: 13))
 
-        Text(detail)
-          .font(.system(size: 11, weight: .medium))
-          .foregroundStyle(.secondary)
+        if let problem {
+          Text(problem)
+            .font(.system(size: 11))
+            .foregroundStyle(.red)
+        }
       }
+      .frame(maxWidth: .infinity, alignment: .leading)
+
+      Toggle(title, isOn: $isOn)
+        .labelsHidden()
+        .toggleStyle(.switch)
+        .controlSize(.small)
     }
-  }
-}
-
-/// One input row: icon, title and detail, then an optional status label and switch.
-/// `isActive` tints the row while its device is the one currently scrolling.
-private struct InputRow: View {
-  let title: String
-  let detail: String
-  let systemImage: String
-  var status: String?
-  var isOn: Binding<Bool>?
-  var isActive = false
-
-  var body: some View {
-    HStack(spacing: 8) {
-      Image(systemName: systemImage)
-        .font(.system(size: 14, weight: .semibold))
-        .foregroundStyle(tint)
-        .frame(width: 20, height: 20)
-
-      VStack(alignment: .leading, spacing: 2) {
-        Text(title)
-          .font(.system(size: 12, weight: .semibold))
-          .foregroundStyle(.primary)
-
-        Text(detail)
-          .font(.system(size: 10, weight: .medium))
-          .foregroundStyle(.secondary)
-          .lineLimit(1)
-      }
-
-      Spacer(minLength: 8)
-
-      if let status {
-        Text(status)
-          .font(.system(size: 11, weight: .semibold, design: .rounded))
-          .foregroundStyle(tint)
-          .lineLimit(1)
-      }
-
-      if let isOn {
-        Toggle("", isOn: isOn)
-          .labelsHidden()
-          .toggleStyle(.switch)
-          .controlSize(.small)
-      }
-    }
-    .padding(.horizontal, 9)
-    .padding(.vertical, 7)
-    .background(
-      isActive ? Color.accentColor.opacity(0.16) : Color.secondary.opacity(0.08),
-      in: RoundedRectangle(cornerRadius: 8)
-    )
-    .overlay {
-      RoundedRectangle(cornerRadius: 8)
-        .stroke(isActive ? Color.accentColor.opacity(0.55) : Color.clear, lineWidth: 1)
-    }
+    .padding(.vertical, 6)
     .animation(.easeOut(duration: 0.18), value: isActive)
   }
+}
 
-  private var tint: Color {
-    isActive ? .accentColor : .secondary
+private struct RowDivider: View {
+  var body: some View {
+    Divider()
+      .padding(.leading, Layout.textInset)
   }
 }
 
-private struct ActionLabel: View {
-  let title: String
-  let systemImage: String
+/// Plots brightness against idle minutes: flat until the fade starts, then a straight fall to the floor, which reads as an even fade because the slider scale is perceptual.
+private struct FadeSchedule: View {
+  let start: Float
+
+  private struct Point: Identifiable {
+    let minutes: Double
+    let level: Double
+    var id: Double { minutes }
+  }
 
   var body: some View {
-    Label(title, systemImage: systemImage)
-      .frame(maxWidth: .infinity, alignment: .leading)
+    let startMinutes = IdleDimming.delay / 60
+    let endMinutes = IdleDimming.fadeEnd(from: start) / 60
+    // The tail past the floor shows that brightness stays there, and leaves room for the end label.
+    let lastMinutes = endMinutes * 1.25
+    let points = [
+      Point(minutes: 0, level: Double(start)),
+      Point(minutes: startMinutes, level: Double(start)),
+      Point(minutes: endMinutes, level: Double(IdleDimming.floor)),
+      Point(minutes: lastMinutes, level: Double(IdleDimming.floor)),
+    ]
+
+    Chart(points) { point in
+      AreaMark(x: .value("Idle", point.minutes), y: .value("Brightness", point.level))
+        .foregroundStyle(
+          LinearGradient(
+            colors: [Color.accentColor.opacity(0.3), Color.accentColor.opacity(0.02)],
+            startPoint: .top,
+            endPoint: .bottom
+          )
+        )
+
+      LineMark(x: .value("Idle", point.minutes), y: .value("Brightness", point.level))
+        .foregroundStyle(Color.accentColor)
+        .lineStyle(StrokeStyle(lineWidth: 1.5, lineJoin: .round))
+    }
+    .chartXScale(domain: 0...lastMinutes)
+    .chartYScale(domain: 0...1)
+    .chartXAxis {
+      AxisMarks(values: [startMinutes, endMinutes]) { value in
+        // Centered under its point, since the default leading placement reads as a later minute.
+        AxisValueLabel(anchor: .top, collisionResolution: .disabled) {
+          if let minutes = value.as(Double.self) {
+            Text("\(Int(minutes.rounded())) min")
+          }
+        }
+      }
+    }
+    .chartYAxis {
+      AxisMarks(position: .leading, values: [Double(start), Double(IdleDimming.floor)]) {
+        value in
+        AxisValueLabel {
+          if let level = value.as(Double.self) {
+            Text("\(Int((level * 100).rounded()))%")
+          }
+        }
+      }
+    }
+    .font(.system(size: 10).monospacedDigit())
+    .frame(height: 56)
+    .accessibilityElement(children: .ignore)
+    .accessibilityLabel(
+      "Holds at \(Int((start * 100).rounded()))% for \(Int(startMinutes)) minutes, then dims to \(Int((IdleDimming.floor * 100).rounded()))% by \(Int(endMinutes.rounded())) minutes"
+    )
+  }
+}
+
+/// A menu-style action that highlights under the pointer like a native menu item.
+private struct MenuItem: View {
+  let title: String
+  let action: () -> Void
+  @State private var isHovered = false
+
+  var body: some View {
+    Button(action: action) {
+      Text(title)
+        .font(.system(size: 13))
+        .foregroundStyle(isHovered ? Color.white : Color.primary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, Layout.textInset)
+        .padding(.vertical, 5)
+        .background(
+          isHovered ? Color.accentColor : Color.clear,
+          in: RoundedRectangle(cornerRadius: 8)
+        )
+        .contentShape(Rectangle())
+    }
+    .buttonStyle(.plain)
+    .onHover { isHovered = $0 }
   }
 }
 

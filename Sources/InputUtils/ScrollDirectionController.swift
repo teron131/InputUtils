@@ -4,34 +4,6 @@ import ApplicationServices
 import Combine
 import Foundation
 
-enum ScrollSwitchStatus: Equatable {
-  case running
-  case paused
-  case permissionNeeded
-
-  var title: String {
-    switch self {
-    case .running:
-      return "Input Utils"
-    case .paused:
-      return "Paused"
-    case .permissionNeeded:
-      return "Permission needed"
-    }
-  }
-
-  var detail: String {
-    switch self {
-    case .running:
-      return "Trackpad, mouse, mic."
-    case .paused:
-      return "Scroll events pass through."
-    case .permissionNeeded:
-      return "Allow Accessibility access."
-    }
-  }
-}
-
 enum ActiveScrollDevice {
   case none
   case trackpad
@@ -40,7 +12,7 @@ enum ActiveScrollDevice {
 
 final class ScrollDirectionController: ObservableObject {
   @Published private(set) var isEnabled: Bool
-  @Published private(set) var status: ScrollSwitchStatus = .paused
+  @Published private(set) var needsPermission = false
   @Published private(set) var activeDevice: ActiveScrollDevice = .none
 
   private let enabledKey = "ScrollDirectionController.isEnabled"
@@ -100,7 +72,7 @@ final class ScrollDirectionController: ObservableObject {
       )
     else {
       requestAccessibilityTrustPrompt()
-      status = .permissionNeeded
+      needsPermission = true
       return
     }
 
@@ -114,7 +86,7 @@ final class ScrollDirectionController: ObservableObject {
     }
 
     CGEvent.tapEnable(tap: tap, enable: true)
-    status = .running
+    needsPermission = false
   }
 
   /// Removes the event tap without changing the global trackpad natural-scroll preference.
@@ -123,7 +95,7 @@ final class ScrollDirectionController: ObservableObject {
     activeDeviceTimer?.invalidate()
     activeDeviceTimer = nil
     activeDevice = .none
-    status = .paused
+    needsPermission = false
   }
 
   /// Re-enables a tap that macOS disabled after timeout or user input protection.
@@ -133,7 +105,6 @@ final class ScrollDirectionController: ObservableObject {
     }
 
     CGEvent.tapEnable(tap: eventTap, enable: true)
-    status = .running
   }
 
   /// Inverts mouse-wheel scroll deltas while leaving continuous trackpad-style events untouched.
