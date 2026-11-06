@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="344" viewBox="0 0 880 344" role="img" aria-label="macOS uses one scroll direction for trackpad and mouse; InputUtils gives each device its own">
+  <title>macOS uses one scroll direction for trackpad and mouse; InputUtils gives each device its own</title>
+  <!-- Frosted glass over a blurred wallpaper wash, drawn on its own card so it reads the same on GitHub's light and dark themes. -->
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif; fill: #1D1D1F; }
+    .title { font-size: 16px; font-weight: 600; }
+    .label { font-size: 13px; font-weight: 600; }
+    .note { font-size: 12px; fill: #6E6E73; }
+    .text-purple { fill: #5B3CC4; }
+    .text-orange { fill: #C2540A; }
+    .fill-purple { fill: #6D4AE0; }
+    .fill-orange { fill: #F2711C; }
+    .stroke-purple { stroke: #6D4AE0; }
+    .thin { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .mark { fill: none; stroke: #FFFFFF; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .knob { fill: #FFFFFF; }
+    .rule { fill: none; stroke: #3C3C43; stroke-opacity: 0.22; stroke-width: 1.5; }
+    .glass { fill: #FFFFFF; fill-opacity: 0.66; stroke: #FFFFFF; stroke-opacity: 0.9; stroke-width: 1; }
+    .surface { fill: #FFFFFF; fill-opacity: 0.92; stroke: #C7C7CC; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <clipPath id="card"><rect width="880" height="344" rx="22"/></clipPath>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="70"/></filter>
+    <filter id="lift" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#2A1F5C" flood-opacity="0.12"/></filter>
+    <g id="switch">
+      <rect width="44" height="24" rx="12" class="fill-purple"/>
+      <circle cx="32" cy="12" r="9" class="knob"/>
+    </g>
+    <g id="trackpad">
+      <rect width="120" height="84" rx="12" class="surface"/>
+      <path d="M60 46 V24 M54 28 L60 20 L66 28" class="thin stroke-purple"/>
+      <circle cx="50" cy="60" r="6" class="fill-purple"/>
+      <circle cx="70" cy="60" r="6" class="fill-purple"/>
+    </g>
+    <g id="mouse">
+      <rect width="52" height="84" rx="26" class="surface"/>
+      <path d="M26 1 V34" class="rule"/>
+      <rect x="22" y="12" width="8" height="18" rx="4" class="fill-purple"/>
+      <path d="M68 14 V42 M62 36 L68 44 L74 36" class="thin stroke-purple"/>
+    </g>
+    <g id="right">
+      <circle r="8" class="fill-purple"/>
+      <path d="M-3.5 0 L-1 2.5 L3.5 -2.5" class="mark"/>
+    </g>
+    <g id="wrong">
+      <circle r="8" class="fill-orange"/>
+      <path d="M-3 -3 L3 3 M3 -3 L-3 3" class="mark"/>
+    </g>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="880" height="344" fill="#F2F1F8"/>
+    <g filter="url(#blur)" opacity="0.75">
+      <circle cx="70.4" cy="51.6" r="230" fill="#FFB36B"/>
+      <circle cx="440" cy="-17.2" r="230" fill="#FF8FA8"/>
+      <circle cx="809.6" cy="103.2" r="220" fill="#FFCF7A"/>
+      <circle cx="220" cy="395.6" r="220" fill="#C9A6FF"/>
+      <circle cx="704" cy="378.4" r="210" fill="#FF9E7A"/>
+    </g>
+  </g>
+  <rect x="20" y="20" width="412" height="304" rx="16" class="glass" filter="url(#lift)"/>
+  <rect x="448" y="20" width="412" height="304" rx="16" class="glass" filter="url(#lift)"/>
+  <g transform="translate(20 20)">
+    <text x="24" y="38" class="title">macOS</text>
+    <text x="24" y="58" class="note">One Natural Scrolling switch for both</text>
+    <use href="#switch" x="176" y="86"/>
+    <text x="230" y="103" class="note">Natural scrolling</text>
+    <path d="M198 110 V124 M100 144 V134 Q100 124 110 124 H284 Q294 124 294 134 V144" class="rule"/>
+    <use href="#trackpad" x="40" y="144"/>
+    <use href="#mouse" x="268" y="144"/>
+    <use href="#right" x="38" y="258"/>
+    <text x="52" y="263" class="label text-purple">Feels right</text>
+    <text x="30" y="284" class="note">Content follows your fingers</text>
+    <use href="#wrong" x="228" y="258"/>
+    <text x="242" y="263" class="label text-orange">Runs backwards</text>
+    <text x="220" y="284" class="note">Roll down, you go back up</text>
+  </g>
+  <g transform="translate(448 20)">
+    <text x="24" y="38" class="title">With InputUtils</text>
+    <text x="24" y="58" class="note">Each device scrolls its own way</text>
+    <use href="#switch" x="78" y="86"/>
+    <text x="132" y="103" class="note">Natural</text>
+    <use href="#switch" x="272" y="86"/>
+    <text x="326" y="103" class="note">Traditional</text>
+    <path d="M100 110 V144 M294 110 V144" class="rule"/>
+    <use href="#trackpad" x="40" y="144"/>
+    <use href="#mouse" x="268" y="144"/>
+    <use href="#right" x="38" y="258"/>
+    <text x="52" y="263" class="label text-purple">Feels right</text>
+    <text x="30" y="284" class="note">Content follows your fingers</text>
+    <use href="#right" x="228" y="258"/>
+    <text x="242" y="263" class="label text-purple">Feels right</text>
+    <text x="220" y="284" class="note">Roll down to read further</text>
+  </g>
+</svg>

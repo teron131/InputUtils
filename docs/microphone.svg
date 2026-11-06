@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="316" viewBox="0 0 880 316" role="img" aria-label="macOS switches the input to Bluetooth earbuds each time they connect; InputUtils keeps it on the built-in mic">
+  <title>macOS switches the input to Bluetooth earbuds each time they connect; InputUtils keeps it on the built-in mic</title>
+  <!-- Frosted glass over a blurred wallpaper wash, drawn on its own card so it reads the same on GitHub's light and dark themes. -->
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif; fill: #1D1D1F; }
+    .title { font-size: 16px; font-weight: 600; }
+    .note { font-size: 12px; fill: #6E6E73; }
+    .text-purple { fill: #5B3CC4; }
+    .text-orange { fill: #C2540A; }
+    .fill-purple { fill: #6D4AE0; }
+    .fill-ink { fill: #48484A; }
+    .stroke-purple { stroke: #6D4AE0; }
+    .stroke-orange { stroke: #F2711C; }
+    .line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .thin { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .dash { fill: none; stroke: #3C3C43; stroke-opacity: 0.28; stroke-width: 1.5; stroke-dasharray: 3 5; }
+    .glass { fill: #FFFFFF; fill-opacity: 0.66; stroke: #FFFFFF; stroke-opacity: 0.9; stroke-width: 1; }
+  </style>
+  <defs>
+    <clipPath id="card"><rect width="880" height="316" rx="22"/></clipPath>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="70"/></filter>
+    <filter id="lift" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#2A1F5C" flood-opacity="0.12"/></filter>
+    <g id="earbud">
+      <circle r="7" class="fill-ink"/>
+      <rect x="-2.5" y="3" width="5" height="16" rx="2.5" class="fill-ink"/>
+    </g>
+    <g id="put-back">
+      <path d="M-6 0 L0 -20 L6 0" class="thin stroke-purple" opacity="0.55"/>
+      <circle cy="-20" r="3" class="fill-purple"/>
+    </g>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="880" height="316" fill="#F2F1F8"/>
+    <g filter="url(#blur)" opacity="0.75">
+      <circle cx="70.4" cy="47.4" r="230" fill="#FFB36B"/>
+      <circle cx="440" cy="-15.8" r="230" fill="#FF8FA8"/>
+      <circle cx="809.6" cy="94.8" r="220" fill="#FFCF7A"/>
+      <circle cx="220" cy="363.4" r="220" fill="#C9A6FF"/>
+      <circle cx="704" cy="347.6" r="210" fill="#FF9E7A"/>
+    </g>
+  </g>
+  <rect x="20" y="20" width="840" height="276" rx="16" class="glass" filter="url(#lift)"/>
+  <use href="#earbud" x="330" y="42"/>
+  <text x="330" y="84" text-anchor="middle" class="note">Earbuds connect</text>
+  <path d="M330 98 V288" class="dash"/>
+  <use href="#earbud" x="510" y="42" opacity="0.35"/>
+  <text x="510" y="84" text-anchor="middle" class="note">They drop out</text>
+  <path d="M510 98 V288" class="dash"/>
+  <use href="#earbud" x="630" y="42"/>
+  <text x="630" y="84" text-anchor="middle" class="note">Back again</text>
+  <path d="M630 98 V288" class="dash"/>
+  <use href="#earbud" x="790" y="42" opacity="0.35"/>
+  <text x="790" y="84" text-anchor="middle" class="note">Put away</text>
+  <path d="M790 98 V288" class="dash"/>
+  <text x="40" y="140" class="title">macOS</text>
+  <text x="40" y="160" class="note">Input follows the earbuds</text>
+  <path d="M214 164 H330 V124 H510 V164 H630 V124 H790 V164 H840" class="line stroke-orange"/>
+  <text x="224" y="156" class="note">Built-in mic</text>
+  <text x="340" y="116" class="note text-orange">Earbuds mic, call quality</text>
+  <text x="40" y="248" class="title">With InputUtils</text>
+  <text x="40" y="268" class="note">Input stays on the built-in mic</text>
+  <path d="M214 252 H840" class="line stroke-purple"/>
+  <text x="224" y="244" class="note">Built-in mic</text>
+  <use href="#put-back" x="330" y="252"/>
+  <use href="#put-back" x="630" y="252"/>
+  <text x="340" y="228" class="note text-purple">Put back at once</text>
+</svg>

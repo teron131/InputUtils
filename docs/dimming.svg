@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="300" viewBox="0 0 880 300" role="img" aria-label="Brightness holds for 5 minutes of idle, steps down to 10% by 21 minutes, and jumps back when you return">
+  <title>Brightness holds for 5 minutes of idle, steps down to 10% by 21 minutes, and jumps back when you return</title>
+  <!-- Frosted glass over a blurred wallpaper wash, drawn on its own card so it reads the same on GitHub's light and dark themes. -->
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif; fill: #1D1D1F; }
+    .label { font-size: 13px; font-weight: 600; }
+    .note { font-size: 12px; fill: #6E6E73; }
+    .text-orange { fill: #C2540A; }
+    .fill-orange { fill: #F2711C; }
+    .stroke-orange { stroke: #F2711C; }
+    .line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .thin { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .rule { fill: none; stroke: #3C3C43; stroke-opacity: 0.22; stroke-width: 1.5; }
+    .dash { fill: none; stroke: #3C3C43; stroke-opacity: 0.28; stroke-width: 1.5; stroke-dasharray: 3 5; }
+    .glass { fill: #FFFFFF; fill-opacity: 0.66; stroke: #FFFFFF; stroke-opacity: 0.9; stroke-width: 1; }
+    .surface { fill: #FFFFFF; fill-opacity: 0.92; stroke: #C7C7CC; stroke-width: 1.5; }
+  </style>
+  <defs>
+    <clipPath id="card"><rect width="880" height="300" rx="22"/></clipPath>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="70"/></filter>
+    <filter id="lift" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#2A1F5C" flood-opacity="0.12"/></filter>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F2711C" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#F2711C" stop-opacity="0.02"/>
+    </linearGradient>
+    <clipPath id="lens"><circle cx="424" cy="108" r="29"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="880" height="300" fill="#F2F1F8"/>
+    <g filter="url(#blur)" opacity="0.75">
+      <circle cx="70.4" cy="45" r="230" fill="#FFB36B"/>
+      <circle cx="440" cy="-15" r="230" fill="#FF8FA8"/>
+      <circle cx="809.6" cy="90" r="220" fill="#FFCF7A"/>
+      <circle cx="220" cy="345" r="220" fill="#C9A6FF"/>
+      <circle cx="704" cy="330" r="210" fill="#FF9E7A"/>
+    </g>
+  </g>
+  <rect x="20" y="20" width="840" height="260" rx="16" class="glass" filter="url(#lift)"/>
+  <text x="64" y="48" class="label">You walk away</text>
+  <text x="64" y="66" class="note">Brightness at 75%</text>
+  <text x="192.7" y="48" class="label">5 min idle</text>
+  <text x="192.7" y="66" class="note">Fade begins</text>
+  <text x="610.8" y="48" text-anchor="middle" class="label">21 min</text>
+  <text x="610.8" y="66" text-anchor="middle" class="note">Floor of 10%</text>
+  <text x="784.5" y="48" text-anchor="middle" class="label">You're back</text>
+  <text x="784.5" y="66" text-anchor="middle" class="note">Restored at once</text>
+  <path d="M192.7 78 V260 M610.8 78 V260 M784.5 78 V260" class="dash"/>
+  <path d="M64 125 H192.7 V126.8 H199.1 V128.6 H205.5 V130.4 H212 V132.2 H218.4 V134 H224.8 V135.8 H231.3 V137.6 H237.7 V139.4 H244.1 V141.2 H250.6 V143 H257 V144.8 H263.4 V146.6 H269.9 V148.4 H276.3 V150.2 H282.7 V152 H289.2 V153.8 H295.6 V155.6 H302 V157.4 H308.5 V159.2 H314.9 V161 H321.3 V162.8 H327.8 V164.6 H334.2 V166.4 H340.6 V168.2 H347.1 V170 H353.5 V171.8 H359.9 V173.6 H366.4 V175.4 H372.8 V177.2 H379.2 V179 H385.7 V180.8 H392.1 V182.6 H398.5 V184.4 H405 V186.2 H411.4 V188 H417.8 V189.8 H424.3 V191.6 H430.7 V193.4 H437.1 V195.2 H443.6 V197 H450 V198.8 H456.4 V200.6 H462.9 V202.4 H469.3 V204.2 H475.7 V206 H482.2 V207.8 H488.6 V209.6 H495 V211.4 H501.5 V213.2 H507.9 V215 H514.3 V216.8 H520.8 V218.6 H527.2 V220.4 H533.6 V222.2 H540.1 V224 H546.5 V225.8 H552.9 V227.6 H559.4 V229.4 H565.8 V231.2 H572.2 V233 H578.7 V234.8 H585.1 V236.6 H591.5 V238.4 H598 V240.2 H604.4 V242 H610.8 H784.5 V125 H836 V260 H64 Z" fill="url(#glow)"/>
+  <path d="M64 125 H192.7 V126.8 H199.1 V128.6 H205.5 V130.4 H212 V132.2 H218.4 V134 H224.8 V135.8 H231.3 V137.6 H237.7 V139.4 H244.1 V141.2 H250.6 V143 H257 V144.8 H263.4 V146.6 H269.9 V148.4 H276.3 V150.2 H282.7 V152 H289.2 V153.8 H295.6 V155.6 H302 V157.4 H308.5 V159.2 H314.9 V161 H321.3 V162.8 H327.8 V164.6 H334.2 V166.4 H340.6 V168.2 H347.1 V170 H353.5 V171.8 H359.9 V173.6 H366.4 V175.4 H372.8 V177.2 H379.2 V179 H385.7 V180.8 H392.1 V182.6 H398.5 V184.4 H405 V186.2 H411.4 V188 H417.8 V189.8 H424.3 V191.6 H430.7 V193.4 H437.1 V195.2 H443.6 V197 H450 V198.8 H456.4 V200.6 H462.9 V202.4 H469.3 V204.2 H475.7 V206 H482.2 V207.8 H488.6 V209.6 H495 V211.4 H501.5 V213.2 H507.9 V215 H514.3 V216.8 H520.8 V218.6 H527.2 V220.4 H533.6 V222.2 H540.1 V224 H546.5 V225.8 H552.9 V227.6 H559.4 V229.4 H565.8 V231.2 H572.2 V233 H578.7 V234.8 H585.1 V236.6 H591.5 V238.4 H598 V240.2 H604.4 V242 H610.8 H784.5 V125 H836" class="line stroke-orange"/>
+  <path d="M64 260 H836" class="rule"/>
+  <text x="74" y="151" class="label text-orange">About 10%</text>
+  <text x="74" y="168" class="note">battery per hour</text>
+  <text x="622.8" y="215" class="label text-orange">About 3.5%</text>
+  <text x="622.8" y="232" class="note">battery per hour</text>
+  <circle cx="384" cy="178.8" r="8" class="thin stroke-orange"/>
+  <path d="M389 171.8 L410 134" class="thin stroke-orange" stroke-width="1.5"/>
+  <circle cx="424" cy="108" r="30" class="surface"/>
+  <path d="M390 92 H404 V102 H418 V112 H432 V122 H446 V132 H460" clip-path="url(#lens)" class="line stroke-orange"/>
+  <circle cx="424" cy="108" r="30" class="thin stroke-orange" stroke-width="1.5"/>
+  <text x="466" y="106" class="label">1 point every 15 s</text>
+  <text x="466" y="124" class="note">65 small steps</text>
+  <path d="M777.5 121 L772.3 118 M781.8 117.5 L779.7 111.8 M787.2 117.5 L789.3 111.8 M791.5 121 L796.7 118" class="thin stroke-orange"/>
+  <circle cx="784.5" cy="125" r="4" class="fill-orange"/>
+</svg>
