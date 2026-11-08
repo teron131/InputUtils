@@ -47,6 +47,19 @@ enum IdleDimming {
     }
   }
 
+  /// Returns the starting level, or nil when a change the person made during the fade should stay instead: dimming further, or raising it at least back to the starting level.
+  /// Raising it only part of the way still gets the starting level, since they asked for brighter.
+  static func restoredLevel(baseline: Float, written: Float, current: Float) -> Float? {
+    let dimmedFurther = current < written - outsideChangeTolerance
+    let reachedBaseline = current >= baseline - outsideChangeTolerance
+    return dimmedFurther || reachedBaseline ? nil : baseline
+  }
+
+  /// Waits until idle time could reach `delay`, then checks once per step.
+  static func nextCheck(afterIdle idle: TimeInterval) -> TimeInterval {
+    idle < delay ? delay - idle : stepInterval
+  }
+
   /// Seconds from the last input until a fade starting at `level` reaches the floor, or `delay` when there is nothing to fade.
   static func fadeEnd(from level: Float) -> TimeInterval {
     let steps = max(0, ((level - floor - step / 2) / step).rounded(.up))

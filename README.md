@@ -26,7 +26,7 @@ InputUtils puts the input back on the built-in mic whenever something changes it
 
 Auto-brightness answers a different question: it sets brightness from the light in the room, and often gets even that wrong. Walking away from your desk does not make the room any darker, so a screen you forgot about keeps burning battery.
 
-After 5 minutes with no keyboard, mouse, or trackpad input, InputUtils lowers the brightness one point on the slider every 15 seconds, down to 10%. Your next input restores your level at once. The fade waits while a video plays and stops if you change the brightness yourself. The menu draws the fade's schedule from your current brightness. In the menu: `Dim screen gradually`.
+After 5 minutes with no keyboard, mouse, or trackpad input, InputUtils lowers the brightness one point on the slider every 15 seconds, down to 10%. Your next input restores your level at once. If you change the brightness yourself during the fade, the fade stops and never leaves it lower than you chose. The fade waits while a video plays and pauses while the screen is off: closing the lid or letting the display sleep restores your level first, so the screen always lights up at it. The menu draws the fade's schedule from your current brightness. In the menu: `Dim screen gradually`.
 
 ### What brightness costs
 
