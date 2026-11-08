@@ -22,11 +22,11 @@ InputUtils puts the input back on the built-in mic whenever something changes it
 
 ## The screen fades when you walk away
 
-![Brightness holds for 5 minutes of idle, steps down to 10% by 21 minutes, and jumps back when you return](docs/dimming.svg)
+![Brightness holds for 5 minutes of idle, steps down to 10% over the next 10 minutes, and jumps back when you return](docs/dimming.svg)
 
 Auto-brightness answers a different question: it sets brightness from the light in the room, and often gets even that wrong. Walking away from your desk does not make the room any darker, so a screen you forgot about keeps burning battery.
 
-After 5 minutes with no keyboard, mouse, or trackpad input, InputUtils lowers the brightness one point on the slider every 15 seconds, down to 10%. Your next input restores your level at once. If you change the brightness yourself during the fade, the fade stops and never leaves it lower than you chose. The fade waits while a video plays and pauses while the screen is off: closing the lid or letting the display sleep restores your level first, so the screen always lights up at it. The menu draws the fade's schedule from your current brightness. In the menu: `Dim screen gradually`.
+After 5 minutes with no keyboard, mouse, or trackpad input, InputUtils dims the screen to 10% over the next 10 minutes, in even steps every 15 seconds from whatever level it starts at. Your next input restores your level at once. If you change the brightness yourself during the fade, the fade stops and never leaves it lower than you chose. The fade waits while a video plays and pauses while the screen is off: closing the lid or letting the display sleep restores your level first, so the screen always lights up at it. In the menu: `Dim screen gradually`, with `Start after`, `Dim over`, and `Dim to` to change the schedule. The menu draws the fade from your current brightness and estimates how much less power your Mac uses once dimmed, from the measurements below.
 
 ### What brightness costs
 

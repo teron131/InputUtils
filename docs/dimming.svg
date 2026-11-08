@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="300" viewBox="0 0 880 300" role="img" aria-label="Brightness holds for 5 minutes of idle, steps down to 10% by 21 minutes, and jumps back when you return">
-  <title>Brightness holds for 5 minutes of idle, steps down to 10% by 21 minutes, and jumps back when you return</title>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="300" viewBox="0 0 880 300" role="img" aria-label="Brightness holds for 5 minutes of idle, steps down to 10% over the next 10 minutes, and jumps back when you return">
+  <title>Brightness holds for 5 minutes of idle, steps down to 10% over the next 10 minutes, and jumps back when you return</title>
   <!-- Frosted glass over a blurred wallpaper wash, drawn on its own card so it reads the same on GitHub's light and dark themes. -->
   <style>
     text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif; fill: #1D1D1F; }
@@ -23,7 +23,7 @@
       <stop offset="0" stop-color="#F2711C" stop-opacity="0.30"/>
       <stop offset="1" stop-color="#F2711C" stop-opacity="0.02"/>
     </linearGradient>
-    <clipPath id="lens"><circle cx="424" cy="108" r="29"/></clipPath>
+    <clipPath id="lens"><circle cx="262" cy="108" r="29"/></clipPath>
   </defs>
   <g clip-path="url(#card)">
     <rect width="880" height="300" fill="#F2F1F8"/>
@@ -40,25 +40,25 @@
   <text x="64" y="66" class="note">Brightness at 75%</text>
   <text x="192.7" y="48" class="label">5 min idle</text>
   <text x="192.7" y="66" class="note">Fade begins</text>
-  <text x="610.8" y="48" text-anchor="middle" class="label">21 min</text>
-  <text x="610.8" y="66" text-anchor="middle" class="note">Floor of 10%</text>
+  <text x="450.1" y="48" text-anchor="middle" class="label">15 min</text>
+  <text x="450.1" y="66" text-anchor="middle" class="note">Floor of 10%</text>
   <text x="784.5" y="48" text-anchor="middle" class="label">You're back</text>
   <text x="784.5" y="66" text-anchor="middle" class="note">Restored at once</text>
-  <path d="M192.7 78 V260 M610.8 78 V260 M784.5 78 V260" class="dash"/>
-  <path d="M64 125 H192.7 V126.8 H199.1 V128.6 H205.5 V130.4 H212 V132.2 H218.4 V134 H224.8 V135.8 H231.3 V137.6 H237.7 V139.4 H244.1 V141.2 H250.6 V143 H257 V144.8 H263.4 V146.6 H269.9 V148.4 H276.3 V150.2 H282.7 V152 H289.2 V153.8 H295.6 V155.6 H302 V157.4 H308.5 V159.2 H314.9 V161 H321.3 V162.8 H327.8 V164.6 H334.2 V166.4 H340.6 V168.2 H347.1 V170 H353.5 V171.8 H359.9 V173.6 H366.4 V175.4 H372.8 V177.2 H379.2 V179 H385.7 V180.8 H392.1 V182.6 H398.5 V184.4 H405 V186.2 H411.4 V188 H417.8 V189.8 H424.3 V191.6 H430.7 V193.4 H437.1 V195.2 H443.6 V197 H450 V198.8 H456.4 V200.6 H462.9 V202.4 H469.3 V204.2 H475.7 V206 H482.2 V207.8 H488.6 V209.6 H495 V211.4 H501.5 V213.2 H507.9 V215 H514.3 V216.8 H520.8 V218.6 H527.2 V220.4 H533.6 V222.2 H540.1 V224 H546.5 V225.8 H552.9 V227.6 H559.4 V229.4 H565.8 V231.2 H572.2 V233 H578.7 V234.8 H585.1 V236.6 H591.5 V238.4 H598 V240.2 H604.4 V242 H610.8 H784.5 V125 H836 V260 H64 Z" fill="url(#glow)"/>
-  <path d="M64 125 H192.7 V126.8 H199.1 V128.6 H205.5 V130.4 H212 V132.2 H218.4 V134 H224.8 V135.8 H231.3 V137.6 H237.7 V139.4 H244.1 V141.2 H250.6 V143 H257 V144.8 H263.4 V146.6 H269.9 V148.4 H276.3 V150.2 H282.7 V152 H289.2 V153.8 H295.6 V155.6 H302 V157.4 H308.5 V159.2 H314.9 V161 H321.3 V162.8 H327.8 V164.6 H334.2 V166.4 H340.6 V168.2 H347.1 V170 H353.5 V171.8 H359.9 V173.6 H366.4 V175.4 H372.8 V177.2 H379.2 V179 H385.7 V180.8 H392.1 V182.6 H398.5 V184.4 H405 V186.2 H411.4 V188 H417.8 V189.8 H424.3 V191.6 H430.7 V193.4 H437.1 V195.2 H443.6 V197 H450 V198.8 H456.4 V200.6 H462.9 V202.4 H469.3 V204.2 H475.7 V206 H482.2 V207.8 H488.6 V209.6 H495 V211.4 H501.5 V213.2 H507.9 V215 H514.3 V216.8 H520.8 V218.6 H527.2 V220.4 H533.6 V222.2 H540.1 V224 H546.5 V225.8 H552.9 V227.6 H559.4 V229.4 H565.8 V231.2 H572.2 V233 H578.7 V234.8 H585.1 V236.6 H591.5 V238.4 H598 V240.2 H604.4 V242 H610.8 H784.5 V125 H836" class="line stroke-orange"/>
+  <path d="M192.7 78 V260 M450.1 78 V260 M784.5 78 V260" class="dash"/>
+  <path d="M64 125 H192.7 V127.9 H199.1 V130.8 H205.6 V133.8 H212.0 V136.7 H218.4 V139.6 H224.9 V142.6 H231.3 V145.5 H237.7 V148.4 H244.2 V151.3 H250.6 V154.2 H257.0 V157.2 H263.5 V160.1 H269.9 V163.0 H276.4 V165.9 H282.8 V168.9 H289.2 V171.8 H295.7 V174.7 H302.1 V177.7 H308.5 V180.6 H315.0 V183.5 H321.4 V186.4 H327.8 V189.3 H334.3 V192.3 H340.7 V195.2 H347.1 V198.1 H353.6 V201.1 H360.0 V204.0 H366.4 V206.9 H372.9 V209.8 H379.3 V212.8 H385.8 V215.7 H392.2 V218.6 H398.6 V221.5 H405.1 V224.4 H411.5 V227.4 H417.9 V230.3 H424.4 V233.2 H430.8 V236.1 H437.2 V239.1 H443.7 V242.0 H450.1 H784.5 V125 H836 V260 H64 Z" fill="url(#glow)"/>
+  <path d="M64 125 H192.7 V127.9 H199.1 V130.8 H205.6 V133.8 H212.0 V136.7 H218.4 V139.6 H224.9 V142.6 H231.3 V145.5 H237.7 V148.4 H244.2 V151.3 H250.6 V154.2 H257.0 V157.2 H263.5 V160.1 H269.9 V163.0 H276.4 V165.9 H282.8 V168.9 H289.2 V171.8 H295.7 V174.7 H302.1 V177.7 H308.5 V180.6 H315.0 V183.5 H321.4 V186.4 H327.8 V189.3 H334.3 V192.3 H340.7 V195.2 H347.1 V198.1 H353.6 V201.1 H360.0 V204.0 H366.4 V206.9 H372.9 V209.8 H379.3 V212.8 H385.8 V215.7 H392.2 V218.6 H398.6 V221.5 H405.1 V224.4 H411.5 V227.4 H417.9 V230.3 H424.4 V233.2 H430.8 V236.1 H437.2 V239.1 H443.7 V242.0 H450.1 H784.5 V125 H836" class="line stroke-orange"/>
   <path d="M64 260 H836" class="rule"/>
   <text x="74" y="151" class="label text-orange">About 10%</text>
   <text x="74" y="168" class="note">battery per hour</text>
   <text x="622.8" y="215" class="label text-orange">About 3.5%</text>
   <text x="622.8" y="232" class="note">battery per hour</text>
-  <circle cx="384" cy="178.8" r="8" class="thin stroke-orange"/>
-  <path d="M389 171.8 L410 134" class="thin stroke-orange" stroke-width="1.5"/>
-  <circle cx="424" cy="108" r="30" class="surface"/>
-  <path d="M390 92 H404 V102 H418 V112 H432 V122 H446 V132 H460" clip-path="url(#lens)" class="line stroke-orange"/>
-  <circle cx="424" cy="108" r="30" class="thin stroke-orange" stroke-width="1.5"/>
-  <text x="466" y="106" class="label">1 point every 15 s</text>
-  <text x="466" y="124" class="note">65 small steps</text>
+  <circle cx="292.5" cy="171.8" r="8" class="thin stroke-orange"/>
+  <path d="M289.1 164.6 L274.9 135.1" class="thin stroke-orange" stroke-width="1.5"/>
+  <circle cx="262" cy="108" r="30" class="surface"/>
+  <path d="M228 92 H242 V102 H256 V112 H270 V122 H284 V132 H298" clip-path="url(#lens)" class="line stroke-orange"/>
+  <circle cx="262" cy="108" r="30" class="thin stroke-orange" stroke-width="1.5"/>
+  <text x="304" y="106" class="label">A step every 15 s</text>
+  <text x="304" y="124" class="note">40 even steps</text>
   <path d="M777.5 121 L772.3 118 M781.8 117.5 L779.7 111.8 M787.2 117.5 L789.3 111.8 M791.5 121 L796.7 118" class="thin stroke-orange"/>
   <circle cx="784.5" cy="125" r="4" class="fill-orange"/>
 </svg>

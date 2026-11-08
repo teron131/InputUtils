@@ -1,4 +1,4 @@
-// Owns idle dimming for the built-in display: the persisted switch, the checks that read idle time and brightness, and putting the starting level back when input returns, the screen turns off, or the app quits.
+// Owns idle dimming for the built-in display: the persisted switch and schedule, the checks that read idle time and brightness, and putting the starting level back when input returns, the screen turns off, or the app quits.
 
 import AppKit
 import Combine
@@ -6,6 +6,17 @@ import CoreGraphics
 
 final class IdleDimmingController: ObservableObject {
   @Published private(set) var isEnabled: Bool
+  /// Saved on every change, and the next check is rescheduled so a shorter delay applies at once.
+  @Published var schedule: IdleDimming.Schedule {
+    didSet {
+      UserDefaults.standard.set(schedule.delay, forKey: delayKey)
+      UserDefaults.standard.set(schedule.duration, forKey: durationKey)
+      UserDefaults.standard.set(schedule.floor, forKey: floorKey)
+      if isEnabled {
+        start()
+      }
+    }
+  }
   let isAvailable: Bool
 
   private static let inputEvents: NSEvent.EventTypeMask = [
@@ -13,6 +24,9 @@ final class IdleDimmingController: ObservableObject {
     .flagsChanged, .gesture,
   ]
   private let enabledKey = "IdleDimmingController.isEnabled"
+  private let delayKey = "IdleDimmingController.delay"
+  private let durationKey = "IdleDimmingController.duration"
+  private let floorKey = "IdleDimmingController.floor"
   private let brightness = BuiltInDisplayBrightness()
   private var phase = IdleDimming.Phase.watching
   private var timer: Timer?
@@ -22,8 +36,19 @@ final class IdleDimmingController: ObservableObject {
   private var observers = Set<AnyCancellable>()
 
   init() {
-    UserDefaults.standard.register(defaults: [enabledKey: true])
+    let standard = IdleDimming.Schedule.standard
+    UserDefaults.standard.register(defaults: [
+      enabledKey: true,
+      delayKey: standard.delay,
+      durationKey: standard.duration,
+      floorKey: standard.floor,
+    ])
     isEnabled = UserDefaults.standard.bool(forKey: enabledKey)
+    schedule = IdleDimming.Schedule(
+      delay: UserDefaults.standard.double(forKey: delayKey),
+      duration: UserDefaults.standard.double(forKey: durationKey),
+      floor: UserDefaults.standard.float(forKey: floorKey)
+    )
     isAvailable = brightness != nil
     observeScreenAndApp()
     if isEnabled {
@@ -95,9 +120,9 @@ final class IdleDimmingController: ObservableObject {
   /// Checking once per step while idle also catches input the event monitor cannot see, such as the brightness keys.
   private func check() {
     let idle = secondsIdle()
-    schedule(after: IdleDimming.nextCheck(afterIdle: idle))
+    scheduleCheck(after: schedule.nextCheck(afterIdle: idle))
 
-    guard idle >= IdleDimming.delay else {
+    guard idle >= schedule.delay else {
       endDimming()
       return
     }
@@ -106,11 +131,7 @@ final class IdleDimmingController: ObservableObject {
       return
     }
 
-    let (next, write) = IdleDimming.advance(
-      phase,
-      level: level,
-      isPlaying: ScreenPlayback.isPlaying()
-    )
+    let (next, write) = schedule.advance(phase, level: level, isPlaying: ScreenPlayback.isPlaying())
     phase = next
     if let write {
       brightness.setLevel(write)
@@ -118,7 +139,7 @@ final class IdleDimmingController: ObservableObject {
     syncInputMonitor()
   }
 
-  private func schedule(after interval: TimeInterval) {
+  private func scheduleCheck(after interval: TimeInterval) {
     timer?.invalidate()
     let timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) {
       [weak self] _ in
